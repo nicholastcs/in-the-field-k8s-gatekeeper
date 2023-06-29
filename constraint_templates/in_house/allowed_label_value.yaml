@@ -1,0 +1,44 @@
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: allowedlabelvalue
+spec:
+  crd:
+    spec:
+      names:
+        kind: AllowedLabelValue
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            label_name:
+              type: string
+            allowed_values:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8labelvalue
+
+        import future.keywords.in
+        import future.keywords.contains
+
+        violation contains {"msg": msg, "details": {"want": want, "got": got}} {
+          label_name := input.parameters.label_name
+          provided_value := input.review.object.metadata.labels[label_name]
+          allowed_values := {allowed_value | allowed_value := input.parameters.allowed_values[_]}
+
+          not provided_value in allowed_values
+
+          want := allowed_values
+          got := provided_value
+          msg := sprintf("label of `%s` must be either `%s`, but got `%s`", 
+            [
+              label_name,
+              concat(", ", allowed_values),
+              provided_value,
+            ]
+          )
+        }

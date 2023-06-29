@@ -1,0 +1,17 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: AllowedLabelValue
+metadata:
+  name: allowed-env-label-value
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+      - apiGroups: ["apps"]
+        kinds: ["Deployment"]
+  parameters:
+    label_name: "env"
+    allowed_values:
+      - prod
+      - uat
+      - dev

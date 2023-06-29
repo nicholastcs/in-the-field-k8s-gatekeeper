@@ -1,0 +1,22 @@
+version: '3'
+
+tasks:
+  bootstrap:
+    desc: create Gatekeeper-OPA CRDS in Kubernetes
+    cmd: >-
+      kubectl apply
+      -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/master/deploy/gatekeeper.yaml
+
+  apply-templates:
+    desc: apply cluster-wide Gatekeeper configuration and constraint templates
+    cmds: 
+      - kubectl apply -f ./config.yaml
+      - kubectl apply -k ./constraint_templates/
+
+  apply-constraints:
+    desc: apply constraints
+    cmd: kubectl apply -f ./constraints/
+
+  test:
+    desc: run Gator test suite
+    cmd: gator verify ./tests/suite.yaml --verbose

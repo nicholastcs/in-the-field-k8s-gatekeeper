@@ -1,0 +1,34 @@
+apiVersion: test.gatekeeper.sh/v1alpha1
+kind: Suite
+tests:
+  - name: labeling
+    description: >-
+      Enforce necessary labeling such as `env`, `service`, `tribe` and `dept`.
+    template: ../constraint_templates/in_house/labels.yaml
+    constraint: ../constraints/required_team_labels.yaml
+    cases:
+      - name: disallow labelled
+        object: input/label_disallowed.yaml
+        assertions:
+        - violations: yes
+
+      - name: allow labelled
+        object: input/label_allowed.yaml
+        assertions:
+        - violations: no
+
+  - name: env label value convention
+    description: >-
+      `env` label should either be `prod`, `uat` or `dev`.
+    template: ../constraint_templates/in_house/allowed_label_value.yaml
+    constraint: ../constraints/allowed_env_label.yaml
+    cases:
+      - name: allowed `env` label value 
+        object: input/env_label_allowed.yaml
+        assertions:
+        - violations: no
+
+      - name: disallowed `env` label value 
+        object: input/env_label_disallowed.yaml
+        assertions:
+        - violations: yes
